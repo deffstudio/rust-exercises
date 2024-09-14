@@ -1,5 +1,6 @@
 use dotenv::dotenv;
 use log::info;
+use reqwest::Client;
 use std::env;
 use std::error::Error;
 use teloxide::dispatching::Dispatcher;
@@ -14,6 +15,7 @@ enum Command {
     Start,
     Help,
     Menu,
+    Crypto,
 }
 
 async fn handle_message(
@@ -38,7 +40,7 @@ async fn handle_message(
                 // Respond only with the Menu command message
                 let keyboard = InlineKeyboardMarkup::new(vec![
                     vec![
-                        InlineKeyboardButton::callback("Option 1", "option1"),
+                        InlineKeyboardButton::callback("🪙 CoinGecko", "crypto"),
                         InlineKeyboardButton::callback("Option 2", "option2"),
                     ],
                     vec![
@@ -51,6 +53,10 @@ async fn handle_message(
                 bot.send_message(msg.chat.id, "Here is the menu:")
                     .reply_markup(keyboard)
                     .await?;
+            }
+            Ok(Command::Crypto) => {
+                let crypto_prices = fetch_crypto_prices().await?;
+                bot.send_message(msg.chat.id, crypto_prices).await?;
             }
             Err(_) => {
                 // Handle unknown commands or invalid input
@@ -77,16 +83,41 @@ async fn handle_callback_query(
 
     let data = callback_query.data.unwrap_or_default();
     let response = match data.as_str() {
-        "option1" => "You chose Option 1!",
-        "option2" => "You chose Option 2!",
-        "option3" => "You chose Option 3!",
-        "option4" => "You chose Option 4!",
-        "info" => "Here is more info about the menu options!",
-        _ => "Unknown option",
+        "crypto" => fetch_crypto_prices()
+            .await
+            .unwrap_or("Failed to fetch crypto prices".to_string()),
+        "option2" => "You chose Option 2!".to_string(),
+        "option3" => "You chose Option 3!".to_string(),
+        "option4" => "You chose Option 4!".to_string(),
+        "info" => "Here is more info about the menu options!".to_string(),
+        _ => "Unknown option".to_string(),
     };
 
     bot.send_message(callback_query.from.id, response).await?;
     Ok(())
+}
+
+async fn fetch_crypto_prices() -> Result<String, Box<dyn Error + Send + Sync>> {
+    // Fetch base URL from environment variable
+    let base_url = env::var("COINGECKO_BASE_URL")?;
+    let client = Client::new();
+    let url = format!(
+        "{}simple/price?ids=bitcoin,ethereum,tether,bnb,solana&vs_currencies=usd",
+        base_url
+    );
+    let response = client.get(&url).send().await?;
+    let prices: serde_json::Value = response.json().await?;
+
+    let bitcoin_price = prices["bitcoin"]["usd"].as_f64().unwrap_or(0.0);
+    let ethereum_price = prices["ethereum"]["usd"].as_f64().unwrap_or(0.0);
+    let tether_price = prices["tether"]["usd"].as_f64().unwrap_or(0.0);
+    //let bnb_price = prices["bnb"]["usd"].as_f64().unwrap_or(0.0);
+    let solana_price = prices["solana"]["usd"].as_f64().unwrap_or(0.0);
+
+    Ok(format!(
+        "Bitcoin: ${:.2}\nEthereum: ${:.2}\nTether: ${:.2}\nSolana: ${:.2}",
+        bitcoin_price, ethereum_price, tether_price, solana_price,
+    ))
 }
 
 #[tokio::main]
