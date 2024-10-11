@@ -1,4 +1,4 @@
-use supper::supper::enums::TaskStatus;
+use super::super::enums::TaskStatus;
 
 pub struct Base {
     pub title: String,
