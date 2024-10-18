@@ -1,4 +1,8 @@
-# Project Title
+# Rust Exercises 🦀
+
+This repository contains my Rust programming exercises, focusing on small projects that help deepen my understanding of the language and its ecosystem. Each project tackles various fundamental and advanced concepts in Rust, ranging from data structures and algorithms to async programming, error handling, and system-level programming.
+
+Feel free to explore the exercises, check out the solutions, and follow along as I progress in mastering Rust.
 
 ## Table of Contents
 
@@ -22,28 +26,6 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 - **Rust**: Ensure you have Rust and Cargo installed. If not, follow the instructions at [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
-
-```
-Give examples
-```
-
-### Installing
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone <repository-url>
-   cd rust-exercises
-
-   ```
-
-2. **Build and run:**
-   ```bash
-   cargo run
-
-   ```
-
-End with an example of getting some data out of the system or using it for a little demo.
 
 ## Usage <a name = "usage"></a>
 
